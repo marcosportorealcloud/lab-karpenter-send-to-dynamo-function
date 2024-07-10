@@ -4,26 +4,25 @@ import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 const client = new DynamoDBClient({});
 
 export const handler = async (event) => {
+  // Parse event that contains an SNS Message
   console.log("Received event:", JSON.stringify(event, null, 2));
-  console.log("Printing the Records")
-  console.log(event.Records)
+  
+  // Collect the Message and its publish time 
   var SnsPublishTime = event.Records[0].Sns.Timestamp;
-  var SnsTopicArn = event.Records[0].Sns.TopicArn;
+  // var SnsTopicArn = event.Records[0].Sns.TopicArn;
   var SNSMessage = event.Records[0].Sns.Message;
   
+  // Parse the Message which is in JSON format
   SNSMessage = JSON.parse(SNSMessage);
-  console.log("Printing Message");
-  console.log("Message Detail Instance ID: ", SNSMessage.detail['instance-id']);
-
+  
+  // Store the relevant keys and values
   // var SNSMessageType = SNSMessage.notificationType;
   var SNSMessageId = SNSMessage.id;
   var SNSMessageInstanceId = SNSMessage.detail['instance-id'];
   // var SNSDestinationAddress = SNSMessage.mail.destination.toString();
   var LambdaReceiveTime = new Date().toString();
   
-  console.log("Printing ID")
-  console.log(SNSMessageId)
-
+  // Persists the Message relevant keys and values into the DynamoDB table
   var itemParams = {
       TableName: "karpenter-lab-SNS-Notifications",
       Item: {
